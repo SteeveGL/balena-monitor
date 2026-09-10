@@ -1,20 +1,39 @@
-version: '2'
+version: '3.8'
 
 volumes:
-  settings:                          # Only required if using PERSISTENT flag (see below)
+  settings:
 
 services:
+  # The Browser service, adapted from the balena-io-experimental/browser example.
   browser:
-    build: .
-    volumes:
-      - 'settings:/data' # Only required if using PERSISTENT flag (see below)
-    network_mode: host
-    privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
+    image: bh.cr/balenalabs/browser-aarch64 # IMPORTANT: Update <arch> (e.g., aarch64, amd64)
+    container_name: browser
     restart: always
+    privileged: true # Required for UDEV to find peripherals like USB mice
+    ports:
+      - 5011:5011 # Management API
+      - 35173:35173 # Chromium debugging port
+    volumes:
+      - settings:/data # Persist user settings
+      # You might need to mount specific device files here if running on bare metal
+      # Example: - /dev/input/event*:/dev/input/event*
 
-  # browser:
-  #   restart: always
-  #   image: bh.cr/balenalabs/browser-aarch64
-  #   privileged: true
-  #   volumes:
-  #     - 'settings:/data'
+  # Scheduler service to manage display power/state
+  scheduler:
+    image: alpine:latest # A minimal image for running simple scripts
+    container_name: display_scheduler
+    restart: always
+    privileged: true # Must be privileged to access raw device nodes for display control
+    volumes:
+      - settings:/data # Volumes for settings consistency
+      - ./scheduler:/etc/scheduler/scripts # Mount local scripts
+      - /dev:/dev # Mount the entire device directory for full hardware access
+    environment:
+      # Setting DISPLAY to ensure the container knows which display to control
+      - DISPLAY=host
+    command: /bin/sh -c "while true; do sleep 30; # Wait 30 seconds before re-checking schedule; ./check_schedule.sh; done" # Check every 30 seconds for quicker reaction
+    # Note: We changed the sleep time and added device mapping/privileged mode.
+
+networks:
+  default:
+    driver: bridge

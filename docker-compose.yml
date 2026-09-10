@@ -1,7 +1,4 @@
-version: "2.1"
-
-volumes:
-  settings:
+version: "2.4"
 
 services:
   # The Browser service, adapted from the balena-io-experimental/browser example.
@@ -20,20 +17,14 @@ services:
 
   # Scheduler service to manage display power/state
   scheduler:
-    image: alpine:latest # A minimal image for running simple scripts
+    build: ./scheduler
     container_name: display_scheduler
     restart: always
-    privileged: true # Must be privileged to access raw device nodes for display control
+    privileged: true
     volumes:
-      - settings:/data # Volumes for settings consistency
-      - ./scheduler:/etc/scheduler/scripts # Mount local scripts
-      - /dev:/dev # Mount the entire device directory for full hardware access
+      - settings:/data 
     environment:
-      # Setting DISPLAY to ensure the container knows which display to control
       - DISPLAY=host
-    command: /bin/sh -c "while true; do sleep 30; # Wait 30 seconds before re-checking schedule; ./check_schedule.sh; done" # Check every 30 seconds for quicker reaction
-    # Note: We changed the sleep time and added device mapping/privileged mode.
 
-networks:
-  default:
-    driver: bridge
+volumes:
+  settings:

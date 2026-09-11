@@ -79,7 +79,7 @@ check_schedule() {
         echo "Scheduled turn-off time reached or passed ($OFF_TIME). Executing display off."
         turn_off_display
     # 2. Check if it's time to turn ON (current time is >= ON_TIME)
-    elif [ "$CURRENT_TOTAL_MINUTES" -ge "$ON_MINUTES" ]; then
+    elif (( CURRENT_TOTAL_MINUTES >= ON_MINUTES )); then
         echo "Scheduled turn-on time reached or passed ($ON_TIME). Executing display on."
         turn_on_display
     else

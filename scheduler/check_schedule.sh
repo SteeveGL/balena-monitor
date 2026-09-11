@@ -61,8 +61,8 @@ check_schedule() {
     # Helper to convert HH:MM string to minutes past midnight
     time_to_minutes() {
         local time_str=$1
-        local h=$((10#${time_str:0:2}))
-        local m=$((10#${time_str:2:2}))
+        local h="${time_str:0:2}"
+        local m="${time_str:2:2}"
         echo $((h * 60 + m))
     }
 

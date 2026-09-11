@@ -14,4 +14,4 @@ COPY check_schedule.sh .
 RUN chmod +x check_schedule.sh
 
 # Run your loop command
-CMD ["/bin/bash", "-c", "while true; do sleep 30; ./check_schedule.sh; done"]
+CMD ["/bin/bash", "-c", "while true; do sleep 300; ./check_schedule.sh; done"]

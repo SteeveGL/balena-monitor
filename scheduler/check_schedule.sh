@@ -1,7 +1,20 @@
 #!/bin/bash
 
+# Set Timezone to America/Los_Angeles for predictable time scheduling
+export TZ="America/Los_Angeles"
+
 # Script to manage the display power/state based on time.
 # This script must be run by the 'scheduler' container.
+
+# --------------------------------------------------------------------------------
+# ENVIRONMENT VARIABLES (Optional Overrides)
+# These variables can be set in the docker-compose.yml file or via the container environment.
+#
+# - SCHEDULE_OFF_TIME: Time (HH:MM) to turn the display off (Default: 23:00).
+# - SCHEDULE_ON_TIME: Time (HH:MM) to turn the display on (Default: 06:30).
+# - SCHEDULE_PRIMARY_DISPLAY: The name of the primary display output (e.g., HDMI-1, DP-1). 
+#                             MUST be verified using 'xrandr' (Default: HDMI-1).
+# --------------------------------------------------------------------------------
 
 # --- Configuration ---
 # Define the target times (HH:MM). Overrides via environment variables are supported.
@@ -32,24 +45,37 @@ turn_on_display() {
 
 # Function to check the current time and execute actions
 check_schedule() {
-    # Get the current time in HH:MM format
-    CURRENT_TIME=$(date +%H:%M)
-    
+    # Get current time components
+    CURRENT_HOUR=$(date +%H)
+    CURRENT_MINUTE=$(date +%M)
+    CURRENT_TOTAL_MINUTES=$((CURRENT_HOUR * 60 + CURRENT_MINUTE))
+
+    # Helper to convert HH:MM string to minutes past midnight
+    time_to_minutes() {
+        local time_str=$1
+        local h=${time_str:0:2}
+        local m=${time_str:2:2}
+        echo $((h * 60 + m))
+    }
+
+    OFF_MINUTES=$(time_to_minutes "$OFF_TIME")
+    ON_MINUTES=$(time_to_minutes "$ON_TIME")
+
     echo "--- Checking Schedule ---"
-    echo "Current time: $CURRENT_TIME"
-    
-    # 1. Check if it's time to turn OFF
-    # NOTE: If the service running this container handles time zones differently, 
-    # you might need to adjust 'date' command usage.
-    if [ "$CURRENT_TIME" = "$OFF_TIME" ]; then
-        echo "Scheduled turn-off time reached ($OFF_TIME). Executing display off."
+    echo "Current Time: $CURRENT_HOUR:$CURRENT_MINUTE (Minutes past midnight: $CURRENT_TOTAL_MINUTES)"
+    echo "Off Time Scheduled: $OFF_TIME ($OFF_MINUTES min)"
+    echo "On Time Scheduled: $ON_TIME ($ON_MINUTES min)"
+
+    # 1. Check if it's time to turn OFF (current time is >= OFF_TIME)
+    if [ "$CURRENT_TOTAL_MINUTES" -ge "$OFF_MINUTES" ]; then
+        echo "Scheduled turn-off time reached or passed ($OFF_TIME). Executing display off."
         turn_off_display
-    # 2. Check if it's time to turn ON
-    elif [ "$CURRENT_TIME" = "$ON_TIME" ]; then
-        echo "Scheduled turn-on time reached ($ON_TIME). Executing display on."
+    # 2. Check if it's time to turn ON (current time is >= ON_TIME)
+    elif [ "$CURRENT_TOTAL_MINUTES" -ge "$ON_MINUTES" ]; then
+        echo "Scheduled turn-on time reached or passed ($ON_TIME). Executing display on."
         turn_on_display
     else
-        echo "Current time ($CURRENT_TIME) is outside the scheduled window."
+        echo "Current time is within the scheduled window."
     fi
 }
 

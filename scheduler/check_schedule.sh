@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set Timezone to America/Los_Angeles for predictable time scheduling
-export TZ="America/Los_Angeles"
+# export TZ="America/Los_Angeles"
 
 # Force Xrandr to target the shared X11 container socket
 export DISPLAY=:0

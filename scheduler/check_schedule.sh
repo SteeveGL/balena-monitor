@@ -29,6 +29,10 @@ PRIMARY_DISPLAY=${SCHEDULE_PRIMARY_DISPLAY:-"HDMI-1"} # Default: HDMI-1
 
 # Function to turn the display OFF
 turn_off_display() {
+    if [ -z "$DISPLAY" ]; then
+        echo "[Scheduler] WARNING: Cannot turn display OFF. DISPLAY environment variable is not set. Skipping xrandr call."
+        return 1
+    fi
     echo "[Scheduler] Attempting to turn display OFF on $PRIMARY_DISPLAY..."
     # Disables the specified output
     xrandr --output "$PRIMARY_DISPLAY" --off
@@ -37,6 +41,10 @@ turn_off_display() {
 
 # Function to turn the display ON
 turn_on_display() {
+    if [ -z "$DISPLAY" ]; then
+        echo "[Scheduler] WARNING: Cannot turn display ON. DISPLAY environment variable is not set. Skipping xrandr call."
+        return 1
+    fi
     echo "[Scheduler] Attempting to turn display ON on $PRIMARY_DISPLAY..."
     # Re-enables the output, potentially restoring its last configuration
     xrandr --output "$PRIMARY_DISPLAY" --auto --output "$PRIMARY_DISPLAY" --on
@@ -55,6 +63,8 @@ check_schedule() {
         local time_str=$1
         local h=${time_str:0:2}
         local m=${time_str:2:2}
+        h=${h#0}
+        m=${m#0}
         echo $((h * 60 + m))
     }
 

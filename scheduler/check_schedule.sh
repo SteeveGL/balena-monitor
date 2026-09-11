@@ -53,10 +53,6 @@ check_schedule() {
     # Helper to convert HH:MM string to minutes past midnight
     time_to_minutes() {
         local time_str=$1
-        if [[ -z "$time_str" ]]; then
-            echo 0
-            return
-        fi
         local h=${time_str:0:2}
         local m=${time_str:2:2}
         echo $((h * 60 + m))
@@ -71,7 +67,7 @@ check_schedule() {
     echo "On Time Scheduled: $ON_TIME ($ON_MINUTES min)"
 
     # 1. Check if it's time to turn OFF (current time is >= OFF_TIME)
-    if [ "$CURRENT_TOTAL_MINUTES" -ge "$OFF_MINUTES" ]; then
+    if (( CURRENT_TOTAL_MINUTES >= OFF_MINUTES )); then
         echo "Scheduled turn-off time reached or passed ($OFF_TIME). Executing display off."
         turn_off_display
     # 2. Check if it's time to turn ON (current time is >= ON_TIME)

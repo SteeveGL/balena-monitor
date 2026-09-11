@@ -2,7 +2,7 @@
 FROM balenalib/raspberrypi3-alpine:latest
 
 # Install bash and any core tools you might need for display switching
-RUN apk add --no-cache bash coreutils
+RUN apk add --no-cache bash coreutils xrandr
 
 # Set up the working directory inside the container
 WORKDIR /usr/src/app

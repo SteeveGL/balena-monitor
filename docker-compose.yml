@@ -18,20 +18,8 @@ services:
   # Scheduler service to manage display power/state
   scheduler:
     build: ./scheduler
-    container_name: display_scheduler
-    restart: always
     privileged: true
-    volumes:
-      - settings:/data
-    environment:
-      - DISPLAY=$DISPLAY
-      - TZ=America/Los_Angeles
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: '0.1'
-    #       memory: 64M
-
+    restart: always
 
 volumes:
   settings:

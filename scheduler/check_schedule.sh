@@ -13,21 +13,23 @@ PRIMARY_DISPLAY=${SCHEDULE_PRIMARY_DISPLAY:-"HDMI-1"}
 
 # --- Display Control Functions ---
 turn_off_display() {
-    if [ -z "$DISPLAY" ]; then
-        echo "[Scheduler] WARNING: DISPLAY variable not set. Skipping xrandr."
-        return 1
-    fi
     echo "[Scheduler] Attempting to turn display OFF on $PRIMARY_DISPLAY..."
-    xrandr --output "$PRIMARY_DISPLAY" --off
+    # *** ACTION REQUIRED ***
+    # Replace this with the actual RPi command to disable the display.
+    # Example: echo 0 > /sys/class/backlight/$PRIMARY_DISPLAY/brightness
+    # Or a specific command for your setup.
+    # For now, this is a placeholder.
+    echo "Display off command executed (Placeholder)."
 }
 
 turn_on_display() {
-    if [ -z "$DISPLAY" ]; then
-        echo "[Scheduler] WARNING: DISPLAY variable not set. Skipping xrandr."
-        return 1
-    fi
     echo "[Scheduler] Attempting to turn display ON on $PRIMARY_DISPLAY..."
-    xrandr --output "$PRIMARY_DISPLAY" --auto
+    # *** ACTION REQUIRED ***
+    # Replace this with the actual RPi command to enable the display.
+    # Example: echo 1 > /sys/class/backlight/$PRIMARY_DISPLAY/brightness
+    # Or a specific command for your setup.
+    # For now, this is a placeholder.
+    echo "Display on command executed (Placeholder)."
 }
 
 # --- Scheduling Math Logic ---

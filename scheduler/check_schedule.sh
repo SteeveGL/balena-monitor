@@ -59,15 +59,14 @@ check_schedule() {
     echo "Off Time Scheduled: $OFF_TIME ($OFF_MINUTES min)"
     echo "On Time Scheduled: $ON_TIME ($ON_MINUTES min)"
 
-    # Exact minute match to prevent display-hammering loops
-    if (( CURRENT_TOTAL_MINUTES == OFF_MINUTES )); then
-        echo "Scheduled turn-off time reached ($OFF_TIME). Executing display off."
+    # Check if the current time is within the off window (inclusive)
+    # Logic assumes OFF_TIME is earlier than ON_TIME for simple windows that don't cross midnight.
+    if (( OFF_MINUTES <= CURRENT_TOTAL_MINUTES && CURRENT_TOTAL_MINUTES <= ON_MINUTES )); then
+        echo "Current time ($CURRENT_HOUR:$CURRENT_MINUTE) is within the Off Time Window ($OFF_TIME - $ON_TIME). Ensuring display is off."
         turn_off_display
-    elif (( CURRENT_TOTAL_MINUTES == ON_MINUTES )); then
-        echo "Scheduled turn-on time reached ($ON_TIME). Executing display on."
-        turn_on_display
     else
-        echo "No exact time match. Monitoring..."
+        echo "Current time ($CURRENT_HOUR:$CURRENT_MINUTE) is outside the Off Time Window ($OFF_TIME - $ON_TIME). Ensuring display is on."
+        turn_on_display
     fi
 }
 

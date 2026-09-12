@@ -24,6 +24,7 @@ services:
     volumes:
       - settings:/data
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - /root/.Xauthority:/root/.Xauthority
     environment:
       - DISPLAY=$DISPLAY
       - TZ=America/Los_Angeles

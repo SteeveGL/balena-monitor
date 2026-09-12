@@ -22,9 +22,11 @@ services:
     restart: always
     privileged: true
     volumes:
-      - settings:/data 
+      - settings:/data
+      - /tmp/.X11-unix:/tmp/.X11-unix
     environment:
-      - DISPLAY=host
+      - DISPLAY=$DISPLAY
+      - TZ=America/Los_Angeles
     # deploy:
     #   resources:
     #     limits:

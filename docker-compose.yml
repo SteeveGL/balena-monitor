@@ -3,34 +3,48 @@ version: "2.4"
 services:
   # The Browser service, adapted from the balena-io-experimental/browser example.
   browser:
-    image: bh.cr/balenalabs/browser-aarch64 # IMPORTANT: Update <arch> (e.g., aarch64, amd64)
+    image: bh.cr/balenalabs/browser-aarch64
     container_name: browser
     restart: always
-    privileged: true # Required for UDEV to find peripherals like USB mice
+    privileged: true
     ports:
-      - 5011:5011 # Management API
-      - 35173:35173 # Chromium debugging port
+      - "5011:5011"    # Management API remains open to the host
+      - "35173:35173"  # Chromium debugging remains open to the host
     volumes:
-      - settings:/data # Persist user settings
-      # You might need to mount specific device files here if running on bare metal
-      # Example: - /dev/input/event*:/dev/input/event*
+      - settings:/data
+    dns:
+      - 172.20.0.5     # Forces the browser to route all web traffic through Pi-hole
+    networks:
+      adblock_net:     # Joins the isolated bridge network
     depends_on:
       - pihole      
 
   # Pi-hole Ad-Blocker Container
   pihole:
     image: pihole/pihole:latest
+    restart: always
+    # Port 53 is REMOVED from the host mapping to stop the "address already in use" error.
+    # It remains fully active inside the 'adblock_net' network.
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-      - "80:80/tcp"
+      - "8080:80/tcp"  # Moved Pi-hole dashboard to 8080 to prevent host port 80 conflicts
     volumes:
       - 'pihole_config:/etc/pihole'
       - 'dnsmasq_config:/etc/dnsmasq.d'
     environment:
       TZ: 'America/New_York'
+      FTLCONF_LOCAL_IPV4: '172.20.0.5' # Tells Pi-hole its static internal IP
+    networks:
+      adblock_net:
+        ipv4_address: 172.20.0.5 # Assigns a fixed IP so the browser always finds it
 
 volumes:
   settings:
   pihole_config:
   dnsmasq_config:
+
+networks:
+  adblock_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24

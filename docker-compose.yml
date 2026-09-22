@@ -14,12 +14,23 @@ services:
       - settings:/data # Persist user settings
       # You might need to mount specific device files here if running on bare metal
       # Example: - /dev/input/event*:/dev/input/event*
+    depends_on:
+      - pihole      
 
-  # Scheduler service to manage display power/state
-  scheduler:
-    build: ./scheduler
-    privileged: true
-    restart: always
+  # Pi-hole Ad-Blocker Container
+  pihole:
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "80:80/tcp"
+    volumes:
+      - 'pihole_config:/etc/pihole'
+      - 'dnsmasq_config:/etc/dnsmasq.d'
+    environment:
+      TZ: 'America/New_York'
 
 volumes:
   settings:
+  pihole_config:
+  dnsmasq_config:
